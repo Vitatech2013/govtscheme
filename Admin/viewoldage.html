@@ -1,0 +1,310 @@
+<html>
+<title>TS Schemes</title>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <style>
+        .tablecss {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 98%;
+        }
+
+        .tablecss td,
+        .tablecss th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .tablecss tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .tablecss tr:hover {
+            background-color: #ddd;
+        }
+
+        .tablecss th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: lavender;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<script>
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function LoadApplication() {
+        const getdata = performAjax("GET", "http://localhost:1234/admin/viewoldage");
+        getdata
+            .then((profile) => {
+                LoadOldAge(profile);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function LoadOldAge(oldages) {
+        const oldage = JSON.parse(oldages);
+        let tableRow = '';
+        let tableHeader = `<tr><th>Sno</th><th>Name</th><th>Age</th><th>MobileNumber</th><th>AadharNo</th><th>Occupation</th><th>AccNumber</th><th>BankName</th><th>Address</th><th>Status</th><th>View Details</th></tr>`;
+        if (oldage.length > 0) {
+            tableRow = oldage.map((details, index) => {
+                const deleteButton = `<button id="${details._id}"
+                            onclick="deleteComName(event)" style="color:red"  class="glyphicon glyphicon-trash"></button>`;
+                const viewButton = `<a id="${details._id}" onclick="ViewDetails(event)" style="color:blue"  class="glyphicon glyphicon-open"   data-toggle="modal" data-target="#pension"></a>`;
+
+                const editButton = `<button id="${details._id}" onclick="editComName(event)" style="color:green"  class="glyphicon glyphicon-pencil"></button>`;
+                return `<tr><td>${index + 1}</td><td>${details.name}</td> 
+                                <td>${details.age}</td> <td>${details.phoneno}</td> <td>${details.aadharno}</td> <td>${details.occupation}</td><td>${details.accountno}</td> <td>${details.bankname}</td><td>${details.address}</td><td>${details.status}</td><td>${viewButton}</td> </tr>`;
+            });
+            document.getElementById("viewoldage").innerHTML = `${tableHeader}${tableRow.join('')}`;
+        }
+        else {
+            tableRow = `<tr><td colspan="12" align="center">No Data Found</td></tr>`;
+            document.getElementById("viewoldage").innerHTML = `${tableHeader}${tableRow}`;
+        }
+    }
+
+    function ViewDetails(event) {
+        const getUsersPromise = performAjax("GET", `http://localhost:1234/admin/viewoldage/${event.target.id}`);
+        getUsersPromise
+            .then((data) => {
+                const pension = JSON.parse(data);
+                [pension].map(rec => {
+                    document.getElementById("id").value = rec._id;
+                    document.getElementById("name").value = rec.name;
+                    document.getElementById("fathername").value = rec.fathername;
+                    rec.male === 'male' ? document.getElementById("male").checked = true : document.getElementById("female").checked = true;
+                    document.getElementById("dob").value = rec.dob;
+                    document.getElementById("age").value = rec.age;
+                    document.getElementById("mobileno").value = rec.phoneno;
+                    document.getElementById("aadharno").value = rec.aadharno;
+                    document.getElementById("occupation").value = rec.occupation;
+                    document.getElementById("holdername").value = rec.accholdername;
+                    document.getElementById("accountno").value = rec.accountno;
+                    document.getElementById("bankname").value = rec.bankname;
+                    document.getElementById("branchname").value = rec.branchname;
+                    document.getElementById("address").value = rec.address;
+                    document.getElementById("photo").src = rec.photo;
+                    document.getElementById("birthcertificate").src = rec.birthcertificate;
+                    document.getElementById("passbookcopy").src = rec.passbook;
+                    document.getElementById("voterid").src = rec.voterid;
+                });
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+
+    function UpdateStatus() {
+        event.preventDefault();
+        const id = document.getElementById("id").value;
+        const name = document.getElementById("name").value;
+        const status = document.getElementById("status").value;
+
+
+        const getUpdatePromise = performAjax(
+            "PUT",
+            `http://localhost:1234/admin/oldagestatus/${id}`,
+            JSON.stringify({ status: status, name })
+        );
+        getUpdatePromise
+            .then((updatePromise) => {
+                alert('Details Updated');
+                LoadApplication();
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+
+
+
+
+</script>
+
+<body onload="LoadApplication()">
+    <table id="viewoldage" border="2" class="tablecss"></table>
+    <br><br>
+    <form onsubmit="UpdateStatus()">
+        <div class="modal fade" id="pension" role="dialog">
+            <div class="modal-dialogmodal-xl">
+                <div class="modal-content" style="background-color:lavender">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <font style="color:black;text-align: center">
+                            <h3>OldAge Pension Details:</h3>
+                        </font>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="row">
+                            <div class="col-sm-2"><input type="hidden" name="id" id="id" class="form-control"></div>
+                            <div class="col-sm-2"><label for="Student Full Name"> Full Name:</label><br>
+                                <input type="text" name="fullname" id="name" class="form-control"
+                                    placeholder="Enter Yourname" required>
+                            </div>
+
+                            <div class="col-sm-2"><label for="Father name">Father Name:</label><br>
+                                <input type="text" name="fathername" id="fathername" class="form-control"
+                                    placeholder="Enter Fathername" required></div>
+                            <div class="col-sm-2"><label for="DOB">D O B :</label><br>
+                                <input type="date" name="dob" id="dob" class="form-control" required></div>
+                            <div class="col-sm-2"><label for="gender">Gender: </label><br>
+                                <input type="radio" name="gender" id="female" value="female" required>Female
+                                <input type="radio" name="gender" id="male" value="male" required>Male
+                            </div>
+                            <div class="col-sm-2"></div>
+
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+
+                            <div class="col-sm-2"><label for="age">Age:</label><br>
+                                <input type="number" name="age" id="age" class="form-control"
+                                    placeholder="Enter Your Age" required></div>
+                            <div class="col-sm-2"><label for="Aadhar No.">Aadhar No.:</label><br>
+                                <input type="number" name="aadharno" id="aadharno" class="form-control"
+                                    placeholder="e.g.7456-4545-6986" required></div>
+                            <div class="col-sm-2"><label for="Mobile No.">Mobile No.:</label><br>
+                                <input type="number" name="mobileno" id="mobileno" class="form-control"
+                                    placeholder="Enter MobileNumber" required>
+                            </div>
+                            <div class="col-sm-2"><label for="occupation.">Occupation:</label><br>
+                                <select class="form-control" id="occupation">
+                                    <option value="--Select--">--Select--</option>
+                                    <option value="Farmer">Farmer</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Employee">Employee</option>
+                                    <option value="Labour">Labour</option>
+                                </select>
+                            </div>
+
+                            <div class="col-sm-2"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+
+
+                            <div class="col-sm-2"><label for="Select bank">Select Bank:</label><br>
+                                <select class="form-control" id="bankname">
+                                    <option value="--Select--">--Select--</option>
+                                    <option value="SBH">SBH</option>
+                                    <option value="Andhrabank">Andhrabank</option>
+                                    <option value="Kotakbank">Kotakbank</option>
+                                    <option value="SBI">SBI</option>
+                                </select></div>
+                            <div class="col-sm-2">
+                                <label for="branch name">Branch Name</label><br>
+                                <input type="text" name="branch name" id="branchname" class="form-control"
+                                    placeholder="Enter BranchName" required>
+                            </div>
+                            <div class="col-sm-2"><label for="account holder name">Acc HolderName:</label><br>
+                                <input type="text" class="form-control" name="name" id="holdername"
+                                    placeholder="Enter Holdername" required>
+
+                            </div>
+                            <div class="col-sm-2"><label for="account no.">Account No.:</label><br>
+                                <input type="number" name="accountno." id="accountno" class="form-control"
+                                    placeholder="Enter AccNumber" required>
+                            </div>
+
+                            <div class="col-sm-2"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-3"><label for="Address">Address:</label><br>
+                                <textarea col="40" class="form-control" id="address"></textarea>
+                            </div>
+                            <div class="col-sm-7"></div>
+
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="aadhar">Photo</label></div>
+                            <div class="col-sm-4"> <img src="" alt="" name="image1" id="photo" height="120" width="250">
+                            </div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="passbook copy">Passbook Copy</label></div>
+                            <div class="col-sm-4"> <img src="" alt="" name="image2" id="passbookcopy" height="120"
+                                    width="250"></div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="caste certificate">Birth Certificate</label></div>
+                            <div class="col-sm-4"> <img src="" alt="" name="image3" id="birthcertificate" height="120"
+                                    width="250"></div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="voter id">Voter Id</label></div>
+                            <div class="col-sm-4"> <img src="" alt="" name="image4" id="voterid" height="120"
+                                    width="250">
+                            </div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="status">Status</label></div>
+                            <div class="col-sm-3"><select name="status" id="status" class="form-control" required>
+                                    <option value="">Select</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Accept">Accept</option>
+                                    <option value="Reject">Reject</option>
+                            </div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-5"><input type="hidden" id="sss"></div>
+                            <br>
+                            <div class="col-sm-2">
+                                <button type="submit" class="btn btn-success">Update Status</button>
+                            </div>
+                            <div class="col-sm-5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+    </form>
+
+</body>
+
+</html>

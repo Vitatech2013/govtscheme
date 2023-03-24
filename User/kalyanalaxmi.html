@@ -1,0 +1,522 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+    const username = sessionStorage.getItem("username");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function ApplyKalyanalaxmi() {
+        event.preventDefault();
+        const bridalname = document.getElementById("name").value;
+        const bridalfathername = document.getElementById("fname").value;
+        const bridalmothername = document.getElementById("mname").value;
+        const bridaldob = document.getElementById("dob").value;
+        const bridalqualification = document.getElementById("qua").value;
+        const bridalphoneno = document.getElementById("mobileno").value;
+        const bridalmotherphoneno = document.getElementById("mobileno").value;
+        const bridalaadharno = document.getElementById("baadhar").value;
+        const bridalmotheraadharno = document.getElementById("maadhar").value;
+        const bridalcaste = document.getElementById("caste").value;
+        const bridalincomeno = document.getElementById("incomeno").value;
+        const bridaltotallincome = document.getElementById("totalincome").value;
+        const bridalcasteno = document.getElementById("casteno").value;
+        const bridaldistrict = document.getElementById("bridaldist").value;
+        const bridalmondel = document.getElementById("bridalmdl").value;
+        const bridalvillage = document.getElementById("bridalvlg").value;
+        const holdername = document.getElementById("holdername").value;
+        const bridalmotheraccno = document.getElementById("accountno").value;
+        const bankdistrict = document.getElementById("selectdist").value;
+        const bankname = document.getElementById("selectbank").value;
+        const branchname = document.getElementById("branchname").value;
+        const bridalgroomname = document.getElementById("bridename").value;
+        const bridalgroomfathername = document.getElementById("bridefname").value;
+        const bridalgroommothername = document.getElementById("bridename").value;
+        const bridalgroomdob = document.getElementById("bridedob").value;
+        const bridalgroomqualification = document.getElementById("bridemobileno").value;
+        const bridalgroomphone = document.getElementById("brideaadhar").value;
+        const bridalgroomaadharno = document.getElementById("bridemaadhar").value;
+        const bridalgroomafatheradharno = document.getElementById("bridefaadhar").value;
+        const bridalgroomcaste = document.getElementById("caste").value;
+        const bridalgroomdistrict = document.getElementById("bridedist").value;
+        const bridalgroommandel = document.getElementById("bridemdl").value;
+        const bridalgroomvillage = document.getElementById("bridevlg").value;
+        const marriagedate = document.getElementById("marriagedate").value;
+        const marriageplace = document.getElementById("place").value;
+        const marriageaddress = document.getElementById("address").value;
+
+        const marriagecard = document.getElementById("card").files;
+        const bridalphoto = document.getElementById("photo").files;
+        const aadharcopy = document.getElementById("aadharcopy").files;
+        const passbook = document.getElementById("passbookcopy").files;
+        const castecertificate = document.getElementById("castecertificate").files;
+        const status = "Pending";
+
+        if (marriagecard.length > 0) {
+            var marriagecardToLoad = marriagecard[0];
+            console.log(marriagecardToLoad);
+            var marriagecardfileReader = new FileReader();
+            marriagecardfileReader.onload = function (fileLoadedEvent) {
+                const marriagecardfilepath = fileLoadedEvent.target.result;
+                console.log(marriagecardfilepath);
+                if (bridalphoto.length > 0) {
+                    var photoToLoad = bridalphoto[0];
+                    var photofileReader = new FileReader();
+                    photofileReader.onload = function (fileLoadedEvent) {
+                        const photofilepath = fileLoadedEvent.target.result;
+                        if (aadharcopy.length > 0) {
+                            var aadharToLoad = aadharcopy[0];
+                            var aadharfileReader = new FileReader();
+                            aadharfileReader.onload = function (fileLoadedEvent) {
+                                const aadharfilepath = fileLoadedEvent.target.result;
+                                if (passbook.length > 0) {
+                                    var passbookToLoad = passbook[0];
+                                    var passbookfileReader = new FileReader();
+                                    passbookfileReader.onload = function (fileLoadedEvent) {
+                                        const passbookfilepath = fileLoadedEvent.target.result;
+                                        if (castecertificate.length > 0) {
+                                            var castecertificateToLoad = castecertificate[0];
+                                            var castecertificatefileReader = new FileReader();
+                                            castecertificatefileReader.onload = function (fileLoadedEvent) {
+                                                const castecertificatefilepath = fileLoadedEvent.target.result;
+
+                                                const getRegPromise = performAjax(
+                                                    "POST",
+                                                    `http://localhost:1234/user/applykalyanalaxmi`,
+                                                    JSON.stringify({
+                                                        username, bridalname, bridalfathername, bridalmothername, bridaldob, bridalqualification, bridalphoneno, bridalmotherphoneno, bridalaadharno,
+                                                        bridalmotheraadharno, bridalcaste, bridalincomeno, bridaltotallincome, bridalcasteno, bridaldistrict, bridalmondel, bridalvillage, holdername, bridalmotheraccno, bankdistrict,
+                                                        bankname, branchname, bridalgroomname, bridalgroomfathername, bridalgroommothername, bridalgroomdob, bridalgroomqualification, bridalgroomphone, bridalgroomaadharno, bridalgroomafatheradharno,
+                                                        bridalgroomcaste, bridalgroomdistrict, bridalgroommandel, bridalgroomvillage, marriagedate, marriageplace, marriageaddress, marriagecard: marriagecardfilepath, bridalphoto: photofilepath, aadharcopy: aadharfilepath, passbook: passbookfilepath, castecertificate: castecertificatefilepath, status
+                                                    })
+                                                );
+                                                getRegPromise
+                                                    .then((regPromise) => {
+                                                        alert('Kalyanalaxmi Successfully Applyed');
+                                                        document.getElementById("name").value = "";
+                                                        document.getElementById("fname").value = "";
+                                                        document.getElementById("mname").value = "";
+                                                        document.getElementById("dob").value = "";
+                                                        document.getElementById("qua").value = "";
+                                                        document.getElementById("mobileno").value = "";
+                                                        document.getElementById("baadhar").value = "";
+                                                        document.getElementById("maadhar").value = "";
+                                                        document.getElementById("caste").value = "";
+                                                        document.getElementById("incomeno").value = "";
+                                                        document.getElementById("totalincome").value = "";
+                                                        document.getElementById("casteno").value = "";
+                                                        document.getElementById("bridaldist").value = "";
+                                                        document.getElementById("bridalmdl").value = "";
+                                                        document.getElementById("bridalvlg").value = "";
+                                                        document.getElementById("holdername").value = "";
+                                                        document.getElementById("accountno").value = "";
+                                                        document.getElementById("selectdist").value = "";
+                                                        document.getElementById("selectbank").value = "";
+                                                        document.getElementById("branchname").value = "";
+                                                        document.getElementById("bridename").value = "";
+                                                        document.getElementById("bridefname").value = "";
+                                                        document.getElementById("bridename").value = "";
+                                                        document.getElementById("bridedob").value = "";
+                                                        document.getElementById("bridemobileno").value = "";
+                                                        document.getElementById("brideaadhar").value = "";
+                                                        document.getElementById("bridemaadhar").value;
+                                                        document.getElementById("bridefaadhar").value = "";
+                                                        document.getElementById("caste").value;
+                                                        document.getElementById("bridedist").value = "";
+                                                        document.getElementById("bridemdl").value;
+                                                        document.getElementById("bridevlg").value;
+                                                        document.getElementById("marriagedate").value;
+                                                        document.getElementById("place").value;
+                                                        document.getElementById("address").value
+                                                    })
+                                                    .catch(err => {
+                                                        alert(err.message);
+                                                    })
+                                            }
+                                            castecertificatefileReader.readAsDataURL(castecertificateToLoad);
+                                        }
+                                    }
+                                    passbookfileReader.readAsDataURL(passbookToLoad);
+                                }
+                            }
+                            aadharfileReader.readAsDataURL(aadharToLoad);
+                        }
+
+                    }
+                    photofileReader.readAsDataURL(photoToLoad);
+
+                }
+            }
+            marriagecardfileReader.readAsDataURL(marriagecardToLoad);
+
+        }
+    }
+
+</script>
+
+<body style="font-family: verdena;background-color:rgb(220, 231, 243);border-radius:10px">
+    <center>
+        <h4><u>KALYANA LAKSHMI SCHEME</u></h4>
+    </center>
+    <form onsubmit="ApplyKalyanalaxmi()">
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Bride Details:</h4>
+            </center><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="bride name">Bride Name:</label><br>
+                    <input type="text" class="form-control" name="name" id="name" placeholder="enter name" required>
+                </div>
+                <div class="col-sm-2">
+                    <label for="father name">Father Name:</label><br>
+                    <input type="text" class="form-control" name="fname" id="fname" placeholder="enter name" required>
+                </div>
+                <div class="col-sm-2">
+                    <label for="mother name">Mother Name:</label><br>
+                    <input type="text" class="form-control" name="mname" id="mname" placeholder="enter name" required>
+                </div>
+                <div class="col-sm-2">
+                    <label for="D O B"> D O B:</label><br>
+                    <input type="date" class="form-control" name="dob" id="dob" placeholder="" required>
+                </div>
+                <div class="col-sm-2"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="educational qualification">Educational Qualification:</label><br>
+                    <select class="form-control" id="qua" required>
+                        <option value="">--Select--</option>
+                        <option value="AnyDegree">AnyDegree</option>
+                        <option value="MSC">MSC</option>
+                        <option value="MCA">MCA</option>
+                        <option value="B.Tech">B.Tech</option>
+
+
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <label for="mobile no.">Mobile No.:</label><br>
+                    <input type="text" class="form-control" name="mobile no." id="mobileno" placeholder="enter number"
+                        maxlength="10" required pattern="[6-9]{1}[0-9]{9}">
+                </div>
+                <div class="col-sm-2">
+                    <label for="bride aadhar no.">Bride Aadhar No.</label><br>
+                    <input type="number" class="form-control" name="baadhar" id="baadhar"
+                        placeholder="e.g.5469-5482-7879" required>
+                </div>
+                <div class="col-sm-2">
+                    <label for="mother aadhar no.">Mother Aadhar No.</label><br>
+                    <input type="number" class="form-control" name="maadhar" id="maadhar"
+                        placeholder="e.g.5469-5482-7879" required>
+                </div>
+                <div class="col-sm-2"></div>
+            </div><br>
+        </div><br>
+
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Income & Caste Details:</h4>
+            </center>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2">
+                    <label for="caste">Caste:</label><br>
+                    <select class="form-control" id="caste" required>
+                        <option value="">--Select--</option>
+                        <option value="SC">SC</option>
+                        <option value="ST">ST</option>
+                        <option value="BC">BC</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+
+                <div class="col-sm-2">
+                    <label for="income certificate no.">Income Certificate No.:</label><br>
+                    <input type="text" name="incomeno." id="incomeno" class="form-control" placeholder="" required>
+                </div>
+                <div class="col-sm-2">
+                    <label for="toatal income">Total Income:</label><br>
+                    <input type="number" class="form-control" name="totalincome" id="totalincome" placeholder=""
+                        required>
+                </div>
+                <div class="col-sm-2">
+                    <label for="caste certificate no.">Caste Certificate No.:</label><br>
+                    <input type="text" name="casteno." id="casteno" class="form-control" placeholder="" required>
+                </div>
+                <div class="col-sm-2"></div>
+            </div><br>
+
+        </div><br>
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Address:</h4>
+            </center>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-3">
+                    <label for="district">District:</label><br>
+                    <select class="form-control" id="bridaldist" required>
+                        <option value="">--Select--</option>
+                        <option value="Peddapally">Peddapally</option>
+                        <option value="Karimnagar">Karimnagar</option>
+                        <option value="Warangal">Warangal</option>
+                        <option value="RajannaSircilla">RajannaSircilla</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label for="mandal">Mandal:</label><br>
+                    <select class="form-control" id="bridalmdl" required>
+                        <option value="">--Select--</option>
+                        <option value="Sulthanabad">Sulthanabad</option>
+                        <option value="Manakondoor">Manakondoor</option>
+                        <option value="Huzurabad">Huzurabad</option>
+                        <option value="Vemulawada">Vemulawada</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label for="village">village:</label><br>
+                    <input type="text" name="village" id="bridalvlg" class="form-control" placeholder="Enter Village"
+                        required>
+                </div>
+
+                <div class="col-sm-2"></div>
+            </div><br>
+            <br>
+        </div><br>
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Bride Mother Bank Account Details:</h4>
+            </center>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="account holder name">Account Holder Name</label><br>
+                    <input type="text" class="form-control" name="name" id="holdername"
+                        placeholder="Enter AccHoldername" required>
+
+                </div>
+                <div class="col-sm-2"><label for="account no.">Account No.:</label><br>
+                    <input type="number" name="accountno." id="accountno" class="form-control"
+                        placeholder="Enter Your AccNo" required>
+                </div>
+                <div class="col-sm-2"><label for="select district">Select District:</label><br>
+                    <select class="form-control" id="selectdist" required>
+                        <option value="">--Select--</option>
+                        <option value="Peddapally">Peddapally</option>
+                        <option value="Karimnagar">Karimnagar</option>
+                        <option value="Warangal">Warangal</option>
+                        <option value="RajannaSircilla">RajannaSircilla</option>
+                    </select>
+                </div>
+                <div class="col-sm-2"><label for="Select bank">Select Bank:</label><br>
+                    <select class="form-control" id="selectbank" required>
+                        <option value="">--Select--</option>
+                        <option value="SBH">SBH</option>
+                        <option value="Andhrabank">Andhrabank</option>
+                        <option value="Kotakbank">Kotakbank</option>
+                        <option value="SBI">SBI</option>
+                    </select></div>
+                <div class="col-sm-2"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2">
+                    <label for="branch name">Branch Name</label><br>
+                    <input type="text" name="branch name" id="branchname" class="form-control"
+                        placeholder="Enter BranchName" required>
+                </div>
+                <div class="col-sm-6"></div>
+            </div><br>
+        </div><br>
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Bride Groom Details:</h4>
+
+            </center><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="bride groom name">Bride Groom Name:</label><br>
+                    <input type="text" class="form-control" name="name" id="bridename" placeholder="Enter Yourname"
+                        required>
+                </div>
+                <div class="col-sm-2">
+                    <label for="father name">Father Name:</label><br>
+                    <input type="text" class="form-control" name="fname" id="bridefname"
+                        placeholder="Enter YourFathername" required>
+                </div>
+
+                <div class="col-sm-2">
+                    <label for="D O B"> D O B:</label><br>
+                    <input type="date" class="form-control" name="dob" id="bridedob" required>
+                </div>
+                <div class="col-sm-3"><label for="educational qualification">Educational Qualification:</label><br>
+                    <select class="form-control" required>
+                        <option value="">--Select--</option>
+                        <option value="AnyDegree">AnyDegree</option>
+                        <option value="MSC">MSC</option>
+                        <option value="MCA">MCA</option>
+                        <option value="B.Tech">B.Tech</option>
+                    </select>
+                </div>
+                <div class="col-sm-1"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2">
+                    <label for="mobile no.">Mobile No.:</label><br>
+                    <input type="text" class="form-control" name="mobile no." id="bridemobileno"
+                        placeholder="enter number" maxlength="10" required pattern="[6-9]{1}[0-9]{9}">
+                </div>
+                <div class="col-sm-2">
+                    <label for="bride aadhar no.">Bride AadharNo.</label><br>
+                    <input type="number" class="form-control" name="baadhar" id="brideaadhar"
+                        placeholder="e.g.5469-5482-7879" required>
+                </div>
+                <div class="col-sm-3">
+                    <label for="father aadhar no.">Mother AadharNo.</label><br>
+                    <input type="number" class="form-control" name="bridemaadhar" id="bridemaadhar"
+                        placeholder="e.g.5469-5482-7879" required>
+                </div>
+                <div class="col-sm-3">
+                    <label for="father aadhar no.">Father AadharNo.</label><br>
+                    <input type="number" class="form-control" name="faadhar" id="bridefaadhar"
+                        placeholder="e.g.5469-5482-7879" required>
+                </div>
+                <div class="col-sm-1"></div>
+            </div><br>
+        </div><br>
+        </div><br>
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Address:</h4>
+            </center>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-3">
+                    <label for="district">District:</label><br>
+                    <select class="form-control" id="bridedist" required>
+                        <option value="">--Select--</option>
+                        <option value="Peddapally">Peddapally</option>
+                        <option value="Karimnagar">Karimnagar</option>
+                        <option value="Warangal">Warangal</option>
+                        <option value="RajannaSircilla">RajannaSircilla</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label for="mandal">Mandal:</label><br>
+                    <select class="form-control" id="bridemdl" required>
+                        <option value="">--Select--</option>
+                        <option value="Sulthanabad">Sulthanabad</option>
+                        <option value="Manakondoor">Manakondoor</option>
+                        <option value="Huzurabad">Huzurabad</option>
+                        <option value="Vemulawada">Vemulawada</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label for="village">village:</label><br>
+                    <input type="text" name="village" id="bridevlg" class="form-control" placeholder="Enter VillageName"
+                        required>
+                </div>
+
+                <div class="col-sm-2"></div>
+            </div><br>
+            <br>
+        </div><br>
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Marraige Details:</h4>
+            </center>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-3">
+                    <label for="Marriage Date">Marriage Date:</label><br>
+                    <input type="date" name="mdate" id="marriagedate" class="form-control" required>
+                </div>
+                <div class="col-sm-3">
+                    <label for="marriage place">Marriage Place:</label><br>
+                    <input type="text" name="place" id="place" class="form-control" placeholder="Enter MarriagePlace"
+                        required>
+
+                </div>
+                <div class="col-sm-3">
+                    <label for="marriage address">Marraige Address</label><br>
+                    <textarea col="40" class="form-control" id="address" required></textarea>
+
+                </div>
+
+                <div class="col-sm-1"></div>
+            </div><br>
+        </div><br>
+        <div class="container-fluid" style="background-color:rgb(228, 154, 70);border-radius:10px">
+            <center>
+                <h4 style="color:red">Upload Details:</h4>
+            </center>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="marraige card">Marriage Card</label></div>
+                <div class="col-sm-2"><input type="file" name="card" id="card" required accept="image/*"></div>
+                <div class="col-sm-6"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="bride photo">Bride Photo</label></div>
+                <div class="col-sm-2"><input type="file" name="photo" id="photo" accept="image/*"></div>
+                <div class="col-sm-6"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="aadhar">AadharCopy</label></div>
+                <div class="col-sm-2"><input type="file" name="aadhar" id="aadharcopy" required accept="image/*"></div>
+                <div class="col-sm-6"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="passbook copy">Passbook Copy</label></div>
+                <div class="col-sm-2"><input type="file" name="passbook copy" id="passbookcopy" required
+                        accept="image/*"></div>
+                <div class="col-sm-6"></div>
+            </div><br>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2"><label for="caste certificate">Caste Certificate</label></div>
+                <div class="col-sm-2"><input type="file" name=" castecertificate" id="castecertificate" required
+                        accept="image/*"></div>
+                <div class="col-sm-6"></div>
+            </div><br>
+            <br>
+
+
+
+        </div> <br>
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-success">Apply for Kalyanalakshmi
+                    Scheme</button>
+            </div>
+            <div class="col-sm-5"></div>
+        </div><br>
+        </div>
+    </form><br><br><br>
+</body>

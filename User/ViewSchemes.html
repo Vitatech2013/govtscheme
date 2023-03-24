@@ -1,0 +1,101 @@
+<html>
+<title>TS Schemes</title>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <style>
+        .tablecss {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 98%;
+        }
+
+        .tablecss td,
+        .tablecss th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .tablecss tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .tablecss tr:hover {
+            background-color: #ddd;
+        }
+
+        .tablecss th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: lavender;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<script>
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function LoadSchemes() {
+        const getdata = performAjax("GET", "http://localhost:1234/user/viewschemes");
+        getdata
+            .then((response) => {
+                LoadSchemeList(response);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function LoadSchemeList(schemes) {
+        const scheme = JSON.parse(schemes);
+        let tableHeader = `<tr><th>Sno</th><th>SchemeName</th><th>StartingDate</th><th>EndingDate</th><th>CasteType</th><th>RequiredDocuments</th><th>AboutScheme</th></tr>`;
+        if (scheme.length > 0) {
+            let tableRow = scheme.map((details, index) => {
+                const deleteButton = `<button id="${details._id}"
+                         onclick="deleteComName(event)" style="color:red"  class="glyphicon glyphicon-trash"></button>`;
+                const editButton = `<button id="${details._id}" onclick="editComName(event)" style="color:green"  class="glyphicon glyphicon-pencil"></button>`;
+                return `<tr><td>${index + 1}</td><td>${details.schemename}</td> <td>${details.startdate}</td> <td>${details.enddate}</td><td>${details.castetype}</td>  
+                            <td>${details.requireddocuments}</td> <td>${details.aboutscheme}</td> </tr>`;
+            });
+            document.getElementById("viewschemes").innerHTML = `${tableHeader}${tableRow.join('')}`;
+        }
+        else {
+            tableRow = `<tr><td colspan="8" align="center">No Data Found</td></tr>`;
+            document.getElementById("viewschemes").innerHTML = `${tableHeader}${tableRow}`;
+        }
+    }
+
+</script>
+
+<body onload="LoadSchemes()">
+    <center>
+        <table id="viewschemes" class="tablecss" border="1"></table>
+    </center>
+</body>
+
+</html>

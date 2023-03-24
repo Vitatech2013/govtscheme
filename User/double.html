@@ -1,0 +1,190 @@
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+    const username = sessionStorage.getItem("username");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function ApplyHousing() {
+        event.preventDefault();
+        const name = document.getElementById("name").value;
+        const gender = document.getElementById("male").checked ? "Male" : "Female";
+        const age = document.getElementById("age").value;
+        const phoneno = document.getElementById("mobileno").value;
+        const aadharno = document.getElementById("aadharno").value;
+        const occupation = document.getElementById("occupation").value;
+        const religion = document.getElementById("religion").value;
+        const caste = document.getElementById("caste").value;
+        const residenttype = document.getElementById("type").value;
+        const address = document.getElementById("address").value;
+        const castecertificate = document.getElementById("castecertificate").files;
+        const rationcard = document.getElementById("rationcard").files;
+        const status = "Pending";
+
+        if (castecertificate.length > 0) {
+            var casteToLoad = castecertificate[0];
+            var castefileReader = new FileReader();
+            castefileReader.onload = function (fileLoadedEvent) {
+                const castefile = fileLoadedEvent.target.result;
+                if (rationcard.length > 0) {
+                    var rationcardToLoad = rationcard[0];
+                    var rationcardfileReader = new FileReader();
+                    rationcardfileReader.onload = function (fileLoadedEvent) {
+                        const rationcardfile = fileLoadedEvent.target.result;
+                        const getRegPromise = performAjax(
+                            "POST",
+                            `http://localhost:1234/user/applyhousing`,
+                            JSON.stringify({ username, name, gender, age, phoneno, aadharno, occupation, religion, caste, residenttype, address, castecertificate: castefile, rationcard: rationcardfile, status })
+                        );
+                        getRegPromise
+                            .then((regPromise) => {
+                                alert('Double BedRoom Housing Successfully Applyed');
+                                document.getElementById("name").value = "";
+                                document.getElementById("age").value = "";
+                                document.getElementById("mobileno").value = "";
+                                document.getElementById("aadharno").value = "";
+                                document.getElementById("occupation").value = "";
+                                document.getElementById("religion").value = "";
+                                document.getElementById("caste").value = "";
+                                document.getElementById("type").value = "";
+                                document.getElementById("address").value = "";
+
+                            })
+                            .catch(err => {
+                                alert(err.message);
+                            })
+                    }
+                    rationcardfileReader.readAsDataURL(rationcardToLoad);
+                }
+            }
+
+            castefileReader.readAsDataURL(casteToLoad);
+        }
+    }
+
+</script>
+
+<body style="font-family: verdena"><br>
+    <form onsubmit="ApplyHousing()">
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-6">
+                <h4 style=" font-weight: bold;text-align: center"><u>DOUBLE BED ROOM HOUSING SCHEME</u></h4>
+            </div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="Name"> Name:</label><br>
+                <input type="text" name="name" id="name" class="form-control" placeholder="name" required></div>
+            <div class="col-sm-2"><label for="gender">Gender</label><br>
+                <input type="radio" name="female" id="female" placeholder="">Female
+                <input type="radio" name="male" id="male" placeholder="" checked="true">Male
+            </div>
+            <div class="col-sm-2"><label for="age">Age:</label><br>
+                <input type="number" name="age" id="age" class="form-control" placeholder="" required></div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="Mobile No.">Mobile No.:</label><br>
+                <input type="text" name="mobileno." id="mobileno" class="form-control" placeholder="" maxlength="10"
+                    required pattern="[6-9]{1}[0-9]{9}"></div>
+            <div class="col-sm-2"><label for="Aadhar No.">Aadhar No.:</label><br>
+                <input type="number" name="aadharno." id="aadharno" class="form-control"
+                    placeholder="e.g.7456-4545-6986" required></div>
+            <div class="col-sm-2"><label for="occupation">Occupation:</label><br>
+                <select class="form-control" id="occupation" required>
+                    <option value="">--Select--</option>
+                    <option value="Farmer">Farmer</option>
+                    <option value="Business">Business</option>
+                    <option value="Employee">Employee</option>
+                    <option value="Labour">Labour</option>
+                </select></div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="religion">Religion</label><br>
+                <select class="form-control" id="religion" required>
+                    <option value="">--Select--</option>
+                    <option value="HINDHU">HINDHU</option>
+                    <option value="MUSLIM">MUSLIM</option>
+                    <option value="CRYSTIAN">CRYSTIAN</option>
+                    <option value="OTHER">OTHER</option>
+                </select>
+            </div>
+            <div class="col-sm-2"><label for="caste">Caste:</label>
+                <select class="form-control" id="caste" required>
+                    <option value="">--Select--</option>
+                    <option value="SC">SC</option>
+                    <option value="ST">ST</option>
+                    <option value="BC">BC</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label for="residence type">Residence Type</label><br>
+                <input type="text" name="type" id="type" class="form-control" placeholder="" required>
+            </div>
+
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+
+            <div class="col-sm-2"><label for="address">Address</label><br>
+                <textarea col="40" class="form-control" id="address" required></textarea>
+            </div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="castecertificate">CasteCertificate</label></div>
+            <div class="col-sm-4"><input type="file" name="castecertificate" id="castecertificate" required
+                    accept="image/*">
+            </div>
+
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="rationcard">RationCard</label></div>
+            <div class="col-sm-4"><input type="file" name="rationcard" id="rationcard" required accept="image/*"></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-success">Apply for Double BedRoom Housing</button>
+            </div>
+            <div class="col-sm-5"></div>
+        </div>
+        <br><br><br><br>
+    </form>
+</body>
+
+</html>

@@ -1,0 +1,246 @@
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+    const username = sessionStorage.getItem("username");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function ApplyScholarShip() {
+        event.preventDefault();
+        const studentname = document.getElementById("studentfullname").value;
+        const fathername = document.getElementById("fathername").value;
+        const dob = document.getElementById("dob").value;
+        const gender = document.getElementById("male").checked ? "Male" : "Female";
+        const phoneno = document.getElementById("mobileno").value;
+        const aadharno = document.getElementById("aadharno").value;
+        const ssctype = document.getElementById("regular").checked ? "Regular" : "Supply";
+        const hallticket = document.getElementById("hallticketno").value;
+        const passyear = document.getElementById("passedout").value;
+        const universityname = document.getElementById("university").value;
+        const collegename = document.getElementById("college").value;
+        const course = document.getElementById("course").value;
+        const bankname = document.getElementById("bank").value;
+        const branchname = document.getElementById("branchname").value;
+        const accountno = document.getElementById("accountno").value;
+        const address = document.getElementById("address").value;
+        const aadharcopy = document.getElementById("aadharcopy").files;
+        const passbook = document.getElementById("passbookcopy").files;
+        const castecertificte = document.getElementById("castecertificate").files;
+        const status = "Pending";
+        if (aadharcopy.length > 0) {
+            var aadharcopyToLoad = aadharcopy[0];
+            var aadharcopyfileReader = new FileReader();
+            aadharcopyfileReader.onload = function (fileLoadedEvent) {
+                const aadharcopyfilepath = fileLoadedEvent.target.result;
+                if (passbook.length > 0) {
+                    var passbookToLoad = passbook[0];
+                    var passbookfileReader = new FileReader();
+                    passbookfileReader.onload = function (fileLoadedEvent) {
+                        const passbookfilepath = fileLoadedEvent.target.result;
+                        if (castecertificte.length > 0) {
+                            var castecertificateToLoad = castecertificte[0];
+                            var castecertificatefileReader = new FileReader();
+                            castecertificatefileReader.onload = function (fileLoadedEvent) {
+                                const castecertificatefilepath = fileLoadedEvent.target.result;
+
+                                const getRegPromise = performAjax(
+                                    "POST",
+                                    `http://localhost:1234/user/applystudy`,
+                                    JSON.stringify({ username, studentname, fathername, dob, gender, phoneno, aadharno, ssctype, hallticket, passyear, universityname, collegename, course, bankname, branchname, accountno, address, aadharcopy: aadharcopyfilepath, passbook: passbookfilepath, castecertificte: castecertificatefilepath, status })
+                                );
+                                getRegPromise
+                                    .then((regPromise) => {
+                                        alert('Scholorship Successfully Applyed');
+                                        document.getElementById("studentfullname").value = "";
+                                        document.getElementById("fathername").value = "";
+                                        document.getElementById("mobileno").value = "";
+                                        document.getElementById("aadharno").value = "";
+                                        document.getElementById("hallticketno").value = "";
+                                        document.getElementById("passedout").value = "";
+                                        document.getElementById("university").value = "";
+                                        document.getElementById("college").value = "";
+                                        document.getElementById("course").value = "";
+                                        document.getElementById("bank").value = "";
+                                        document.getElementById("branchname").value = "";
+                                        document.getElementById("accountno").value = "";
+                                        document.getElementById("address").value = "";
+
+                                    })
+                                    .catch(err => {
+                                        alert(err.message);
+                                    })
+                            }
+                            castecertificatefileReader.readAsDataURL(castecertificateToLoad);
+                        }
+                    }
+
+                    passbookfileReader.readAsDataURL(passbookToLoad);
+                }
+            }
+
+            aadharcopyfileReader.readAsDataURL(aadharcopyToLoad);
+
+        }
+    }
+</script>
+
+<body style="font-family: verdena"><br>
+    <form onsubmit="ApplyScholarShip()">
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">
+                <h4 style=" font-weight: bold;text-align: center"><u>STUDYSCOLARSHIP SCHEME</u></h4>
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="Student Full Name">Student Full Name:</label><br>
+                <input type="text" name="studentfullname" id="studentfullname" class="form-control"
+                    placeholder="enter name" required></div>
+
+            <div class="col-sm-2"><label for="Father name">Father Name:</label><br>
+                <input type="text" name="fathername" id="fathername" class="form-control" placeholder="enter name"
+                    required>
+            </div>
+            <div class="col-sm-2"><label for="DOB">D O B :</label><br>
+                <input type="date" name="dob" id="dob" class="form-control" required></div>
+            <div class="col-sm-2"><label for="gender">Gender: </label><br>
+                <input type="radio" name="female" id="female">Female
+                <input type="radio" name="male" id="male" checked="true">Male
+            </div>
+            <div class="col-sm-2"></div>
+
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+
+            <div class="col-sm-2"><label for="Mobile No.">Mobile No.:</label><br>
+                <input type="text" name="mobileno." id="mobileno" class="form-control" placeholder="" maxlength="10"
+                    required pattern="[6-9]{1}[0-9]{9}"></div>
+            <div class="col-sm-2"><label for="Aadhar No.">Aadhar No.:</label><br>
+                <input type="number" name="aadharno." id="aadharno" class="form-control"
+                    placeholder="e.g.7456-4545-6986" required></div>
+            <div class="col-sm-2"><label for="ssctype">SSC Type:</label><br>
+                <input type="radio" name="type" id="regular" required>Regular
+                <input type="radio" name="type" id="supply">Supply
+            </div>
+            <div class="col-sm-2"><label for="Hall ticket No.">Hall Ticket No.:</label><br>
+                <input type="number" name="hallticket no." id="hallticketno" class="form-control" placeholder=""
+                    required>
+            </div>
+
+            <div class="col-sm-2"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="passedout">Passed Out:</label><br>
+                <select class="form-control" id="passedout" required>
+                    <option value="">----select----</option>
+                    <option value="">2017</option>
+                    <option value="">2016</option>
+                    <option value="">2015</option>
+                    <option value="">2014</option>
+                </select>
+            </div>
+
+            <div class="col-sm-2"><label for="University name">University Name:</label><br>
+                <select class="form-control" id="university" required>
+                    <option value="">--Select--</option>
+                    <option value="SathvahanaUniversity">SathvahanaUniversity</option>
+                    <option value="JNTUH">JNTUH</option>
+                    <option value="OsmaniaUniversity">OsmaniaUniversity</option>
+                    <option value="KakathiyaUniversity">KakathiyaUniversity</option>
+                </select></div>
+            <div class="col-sm-2"><label for="college name">College Name:</label><br>
+                <input type="text" class="form-control" name="collegename" id="college" placeholder="Enter CollegeName"
+                    required>
+            </div>
+            <div class="col-sm-2"><label for="course">Course</label><br>
+                <input type="text" class="form-control" name="course" id="course" placeholder="Enter Your Course"
+                    required>
+
+            </div>
+            <div class="col-sm-2"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="address">College Address:</label><br>
+                <textarea col="40" class="form-control" id="address" required></textarea>
+            </div>
+            <div class="col-sm-2"><label for="select bank">Select Bank</label><br>
+                <select class="form-control" id="bank" required>
+                    <option value="">--Select--</option>
+                    <option value="SBH">SBH</option>
+                    <option value="Andhrabank">Andhrabank</option>
+                    <option value="Kotakbank">Kotakbank</option>
+                    <option value="SBI">SBI</option>
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label for="branch name">Branch Name</label><br>
+                <input type="text" name="branch name" id="branchname" class="form-control"
+                    placeholder="Enter BranchName" required>
+            </div>
+            <div class="col-sm-2"><label for="Account No.">Account No.:</label><br>
+                <input type="number" name="accountno" id="accountno" class="form-control"
+                    placeholder="Enter Your AccNumber" required></div>
+            <div class="col-sm-2"></div>
+
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="aadhar">Aadhar Copy</label></div>
+            <div class="col-sm-4"><input type="file" name="aadharcopy" id="aadharcopy" required accept="image/*"></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="passbook copy">Passbook Copy</label></div>
+            <div class="col-sm-4"><input type="file" name="passbookcopy" id="passbookcopy" required accept="image/*">
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="caste certificate">Caste Certificate</label></div>
+            <div class="col-sm-4"><input type="file" name="castecertificate" id="castecertificate" required
+                    accept="image/*"></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+
+
+
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-success">Apply for Scholarship</button>
+            </div>
+            <div class="col-sm-5"></div>
+        </div><br><br><br><br>
+    </form>
+</body>
+
+</html>

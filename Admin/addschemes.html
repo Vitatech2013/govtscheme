@@ -1,0 +1,168 @@
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function AddSchemes() {
+        event.preventDefault();
+        var checkboxes = document.getElementsByClassName('messageCheckbox');
+        var vals = "";
+        for (var i = 0, n = checkboxes.length; i < n; i++) {
+            if (checkboxes[i].checked) {
+                vals += "," + checkboxes[i].value;
+            }
+        }
+        if (vals) vals = vals.substring(1);
+        let requireddocuments = vals;
+        const schemename = document.getElementById("schemename").value;
+        const startdate = document.getElementById("startdate").value;
+        const enddate = document.getElementById("enddate").value;
+        const castetype = document.getElementById("castetype").value;
+        const aboutscheme = document.getElementById("aboutscheme").value;
+        const getRegPromise = performAjax(
+            "POST",
+            `http://localhost:1234/admin/addschemes`,
+            JSON.stringify({ schemename, startdate, enddate, castetype, requireddocuments, aboutscheme })
+        );
+        getRegPromise
+            .then((regPromise) => {
+                alert('SchemesAdded Successfully Completed');
+                document.getElementById("schemename").value = "";
+                document.getElementById("startdate").value = "";
+                document.getElementById("enddate").value = "";
+                document.getElementById("castetype").value = "";
+                document.getElementById("aboutscheme").value = "";
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+</script>
+
+<body style="font-family: verdena">
+    <form onsubmit="AddSchemes()">
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4" style="text-align:center">
+                <h4 style=" font-weight: bold"><u>ADD SCHEMES</u></h4>
+            </div>
+            <div class="col-sm-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"><label for="Name">Scheme Name:</label> </div>
+            <div class="col-sm-3">
+                <select class="form-control" id="schemename" required>
+                    <option value="">--Select--</option>
+                    <option value="Kalyana Laxmi">Kalyana Laxmi</option>
+                    <option value="Study Scholarship">Study Scholarship</option>
+                    <option value="Old Age Pension">Old Age Pension</option>
+                    <option value="Double BedRoom Scheme">Double BedRoom Scheme</option>
+                </select>
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"><label for=">Starting Date">Starting Date:</label></div>
+            <div class="col-sm-3"><input type="date" name="date" class="form-control" id="startdate" placeholder=""
+                    required></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"><label for="Ending Date">Ending Date:</label></div>
+            <div class="col-sm-3"><input type="date" name="date" class="form-control" id="enddate" required></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"><label for="Caste Type">Caste Type:</label></div>
+            <div class="col-sm-3">
+                <select class="form-control" id="castetype" required>
+                    <option value="">--Select--</option>
+                    <option value="SC,ST&BC">SC,ST&BC</option>
+                    <option value="SC,ST&Minority">SC,ST&Minority</option>
+                    <option value="SC,ST,BC&OC">SC,ST,BC&OC</option>
+                </select>
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="Required Documents " style="text-align:right">Required Documents :</label>
+            </div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="aadhar"
+                    value="Aadhar">Aadhar</div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="passbook"
+                    value="Passbook">Passbook</div>
+            <div class="col-sm-3"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"></div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="castecertificate"
+                    value="CasteCertificate" required>Caste Certificate</div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="incomecertificate"
+                    value="IncomeCertificate" required>Income Certificate</div>
+            <div class="col-sm-3"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"></div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="voterid"
+                    value="VoterId" required>Voter Id</div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="rationcard"
+                    value="RationCard" required>Ration Card</div>
+            <div class="col-sm-3"></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"></div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="marraigecard"
+                    value="MarraigeCard" required>Marraige Card</div>
+            <div class="col-sm-2"><input class="messageCheckbox" type="checkbox" name="document" id="photo"
+                    value="Photo" required>Photo</div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="AboutScheme">About Scheme:</label></div>
+            <div class="col-sm-3"><textarea col="50" class="form-control" id="aboutscheme" required></textarea> </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-success">ADD</button>
+            </div>
+            <div class="col-sm-5"></div>
+        </div><br><br><br>
+    </form>
+</body>
+
+</html>

@@ -1,0 +1,93 @@
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+
+
+
+  
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function Send() {
+        event.preventDefault();
+        const name = sessionStorage.getItem("username");
+        const feedback = document.getElementById("feed").value;
+        const date = document.getElementById("date").value;
+        const getRegPromise = performAjax(
+            "POST",
+            `http://localhost:1234/user/sendfeedback`,
+            JSON.stringify({name, feedback,date})
+        );
+        getRegPromise
+            .then((regPromise) => {
+                alert(' Sending Successfully');
+               
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+</script>
+
+<body style="font-family: verdena">
+    <form onsubmit="Send()">
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4" style="text-align:center">
+                <h4 style=" font-weight: bold"><u>Send FeedBack</u></h4>
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br><br>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"><label for="Name">FeedBack:</label> </div>
+            <div class="col-sm-3">
+                <input type="text" id="feed" class="form-control" required>
+               
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-1"><label for="Date"> Date:</label></div>
+            <div class="col-sm-3"><input type="date" name="date" class="form-control" id="date"
+                    required></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+       
+        
+       
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-success">Send</button>
+            </div>
+            <div class="col-sm-5"></div>
+        </div><br><br><br>
+    </form>
+</body>
+
+</html>

@@ -1,0 +1,243 @@
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+<script>
+    const username = sessionStorage.getItem("username");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function AppyOldAge() {
+        event.preventDefault();
+        const name = document.getElementById("name").value;
+        const fathername = document.getElementById("fathername").value;
+        const gender = document.getElementById("male").checked ? "Male" : "Female";
+        const dob = document.getElementById("dob").value;
+        const age = document.getElementById("age").value;
+        const phoneno = document.getElementById("mobileno").value;
+        const aadharno = document.getElementById("aadharno").value;
+        const occupation = document.getElementById("occupation").value;
+        const accholdername = document.getElementById("holdername").value;
+        const accountno = document.getElementById("accountno").value;
+        const bankname = document.getElementById("bankname").value;
+        const branchname = document.getElementById("branchname").value;
+        const address = document.getElementById("address").value;
+        const photo = document.getElementById("photo").files;
+        const birthcertificate = document.getElementById("birthcertificate").files;
+        const passbook = document.getElementById("passbookcopy").files;
+        const voterid = document.getElementById("voterid").files;
+        const status = "Pending";
+        if (photo.length > 0) {
+            var photoToLoad = photo[0];
+            var photofileReader = new FileReader();
+            photofileReader.onload = function (fileLoadedEvent) {
+                const photofilepath = fileLoadedEvent.target.result;
+                if (birthcertificate.length > 0) {
+                    var birthcertificateimageToLoad = photo[0];
+                    var birthcertificatefileReader = new FileReader();
+                    birthcertificatefileReader.onload = function (fileLoadedEvent) {
+                        const birthcertificatefilepath = fileLoadedEvent.target.result;
+                        if (passbook.length > 0) {
+                            var passbookToLoad = passbook[0];
+                            var passbookfileReader = new FileReader();
+                            passbookfileReader.onload = function (fileLoadedEvent) {
+                                const passbookfilepath = fileLoadedEvent.target.result;
+                                if (voterid.length > 0) {
+                                    var voteridToLoad = voterid[0];
+                                    var voteridfileReader = new FileReader();
+                                    voteridfileReader.onload = function (fileLoadedEvent) {
+                                        const voteridfilepath = fileLoadedEvent.target.result;
+
+                                        const getRegPromise = performAjax(
+                                            "POST",
+                                            `http://localhost:1234/user/applyoldage`,
+                                            JSON.stringify({ username, name, fathername, gender, dob, age, phoneno, aadharno, occupation, accholdername, accountno, bankname, branchname, address, photo: photofilepath, birthcertificate: birthcertificatefilepath, passbook: passbookfilepath, voterid: voteridfilepath, status })
+                                        );
+                                        getRegPromise
+                                            .then((regPromise) => {
+                                                alert('Pension Successfully Applyed');
+                                                document.getElementById("name").value = "";
+                                                document.getElementById("fathername").value = "";
+                                                document.getElementById("dob").value = "";
+                                                document.getElementById("age").value = "";
+                                                document.getElementById("mobileno").value = "";
+                                                document.getElementById("aadharno").value = "";
+                                                document.getElementById("occupation").value = "";
+                                                document.getElementById("holdername").value = "";
+                                                document.getElementById("accountno").value = "";
+                                                document.getElementById("bankname").value = "";
+                                                document.getElementById("branchname").value = "";
+                                                document.getElementById("address").value = "";
+                                            })
+                                            .catch(err => {
+                                                alert(err.message);
+                                            })
+                                    }
+                                    voteridfileReader.readAsDataURL(voteridToLoad);
+                                }
+                            }
+                            passbookfileReader.readAsDataURL(passbookToLoad);
+                        }
+                    }
+                    birthcertificatefileReader.readAsDataURL(birthcertificateimageToLoad);
+                }
+            }
+            photofileReader.readAsDataURL(photoToLoad);
+        }
+    }
+</script>
+
+<body style="font-family: verdena"><br>
+    <form onsubmit="AppyOldAge()">
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-6">
+                <h4 style=" font-weight: bold;text-align:center"><u>OLDAGE PENSHION SCHEME</u></h4>
+            </div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="Student Full Name"> Full Name:</label><br>
+                <input type="text" name="fullname" id="name" class="form-control" placeholder="Enter Yourname" required>
+            </div>
+
+            <div class="col-sm-2"><label for="Father name">Father Name:</label><br>
+                <input type="text" name="fathername" id="fathername" class="form-control" placeholder="Enter Fathername"
+                    required></div>
+            <div class="col-sm-2"><label for="DOB">D O B :</label><br>
+                <input type="date" name="dob" id="dob" class="form-control" required></div>
+            <div class="col-sm-2"><label for="gender">Gender: </label><br>
+                <input type="radio" name="gender" id="female" checked="true">Female
+                <input type="radio" name="gender" id="male">Male
+            </div>
+            <div class="col-sm-2"></div>
+
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+
+            <div class="col-sm-2"><label for="age">Age:</label><br>
+                <input type="number" name="age" id="age" class="form-control" placeholder="Enter Your Age" required>
+            </div>
+            <div class="col-sm-2"><label for="Aadhar No.">Aadhar No.:</label><br>
+                <input type="number" name="aadharno" id="aadharno" class="form-control" placeholder="e.g.7456-4545-6986"
+                    required></div>
+            <div class="col-sm-2"><label for="Mobile No.">Mobile No.:</label><br>
+                <input type="text" name="mobileno" id="mobileno" class="form-control" placeholder="Enter MobileNumber"
+                    maxlength="10" required pattern="[6-9]{1}[0-9]{9}">
+            </div>
+            <div class="col-sm-2"><label for="occupation.">Occupation:</label><br>
+                <select class="form-control" id="occupation" required>
+                    <option value="">--Select--</option>
+                    <option value="Farmer">Farmer</option>
+                    <option value="Business">Business</option>
+                    <option value="Employee">Employee</option>
+                    <option value="Labour">Labour</option>
+                </select>
+            </div>
+
+            <div class="col-sm-2"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+
+
+            <div class="col-sm-2"><label for="Select bank">Select Bank:</label><br>
+                <select class="form-control" id="bankname" required>
+                    <option value="">--Select--</option>
+                    <option value="SBH">SBH</option>
+                    <option value="Andhrabank">Andhrabank</option>
+                    <option value="Kotakbank">Kotakbank</option>
+                    <option value="SBI">SBI</option>
+                </select></div>
+            <div class="col-sm-2">
+                <label for="branch name">Branch Name</label><br>
+                <input type="text" name="branch name" id="branchname" class="form-control"
+                    placeholder="Enter BranchName" required>
+            </div>
+            <div class="col-sm-2"><label for="account holder name">Account Holder Name</label><br>
+                <input type="text" class="form-control" name="name" id="holdername" placeholder="Enter Holdername"
+                    required>
+
+            </div>
+            <div class="col-sm-2"><label for="account no.">Account No.:</label><br>
+                <input type="number" name="accountno." id="accountno" class="form-control" placeholder="Enter AccNumber"
+                    required>
+            </div>
+
+
+            <div class="col-sm-2"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-3"><label for="Address">Address:</label><br>
+                <textarea col="40" class="form-control" id="address"></textarea>
+            </div>
+
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"></div>
+
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="aadhar">Photo</label></div>
+            <div class="col-sm-4"><input type="file" name="photo" id="photo" required accept="image/*"></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="passbook copy">Passbook Copy</label></div>
+            <div class="col-sm-4"><input type="file" name="passbook copy" id="passbookcopy" required accept="image/*">
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="caste certificate">Birth Certificate</label></div>
+            <div class="col-sm-4"><input type="file" name="birth certificate" id="birthcertificate" required
+                    accept="image/*"></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-2"><label for="voter id">Voter Id</label></div>
+            <div class="col-sm-4"><input type="file" name="voter id" id="voterid" required accept="image/*"></div>
+            <div class="col-sm-4"></div>
+        </div>
+        <br>
+
+
+
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-success">Apply for Old Age Pension</button>
+            </div>
+            <div class="col-sm-5"></div>
+        </div><br><br>
+    </form>
+</body>
+
+</html>

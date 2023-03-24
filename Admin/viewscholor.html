@@ -1,0 +1,317 @@
+<html>
+<title>TS Schemes</title>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <style>
+        .tablecss {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 98%;
+        }
+
+        .tablecss td,
+        .tablecss th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .tablecss tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .tablecss tr:hover {
+            background-color: #ddd;
+        }
+
+        .tablecss th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: lavender;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<script>
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function LoadApplication() {
+        const getdata = performAjax("GET", "http://localhost:1234/admin/viewstudy");
+        getdata
+            .then((profile) => {
+                LoadScholorShip(profile);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function LoadScholorShip(studys) {
+        const study = JSON.parse(studys);
+        let tableRow = '';
+        let tableHeader = `<tr><th>Sno</th><th>StudentName</th><th>MobileNumber</th><th>AadharNo</th><th>SSCType</th><th>H.T.Number</th><th>PassedYear</th><th>Status</th><th>View</th></tr>`;
+        if (study.length > 0) {
+            tableRow = study.map((details, index) => {
+                const deleteButton = `<button id="${details._id}"
+                            onclick="deleteComName(event)" style="color:red"  class="glyphicon glyphicon-trash"></button>`;
+                const viewButton = `<a id="${details._id}" onclick="ViewDetails(event)" style="color:blue"  class="glyphicon glyphicon-open"   data-toggle="modal" data-target="#scholorship"></a>`;
+
+                const editButton = `<button id="${details._id}" onclick="editComName(event)" style="color:green"  class="glyphicon glyphicon-pencil"></button>`;
+                return `<tr><td>${index + 1}</td><td>${details.studentname}</td> 
+                                <td>${details.phoneno}</td> <td>${details.aadharno}</td> <td>${details.ssctype}</td> <td>${details.hallticket}</td><td>${details.passyear}</td><td>${details.status}</td><td>${viewButton}</td></tr>`;
+            });
+            document.getElementById("viewstudy").innerHTML = `${tableHeader}${tableRow.join('')}`;
+        }
+        else {
+            tableRow = `<tr><td colspan="10" align="center">No Data Found</td></tr>`;
+            document.getElementById("viewstudy").innerHTML = `${tableHeader}${tableRow}`;
+        }
+    }
+
+    function ViewDetails(event) {
+        const getUsersPromise = performAjax("GET", `http://localhost:1234/admin/viewstudy/${event.target.id}`);
+        getUsersPromise
+            .then((data) => {
+                const scholorship = JSON.parse(data);
+                [scholorship].map(rec => {
+                    document.getElementById("id").value = rec._id;
+                    document.getElementById("studentfullname").value = rec.studentname;
+                    document.getElementById("fathername").value = rec.fathername;
+                    document.getElementById("dob").value = rec.dob;
+                    rec.male === 'male' ? document.getElementById("male").checked = true : document.getElementById("female").checked = true;
+                    document.getElementById("mobileno").value = rec.phoneno;
+                    document.getElementById("aadharno").value = rec.aadharno;
+                    rec.regular === 'regular' ? document.getElementById("regular").checked = true : document.getElementById("supply").checked = true;
+                    document.getElementById("hallticketno").value = rec.hallticket;
+                    document.getElementById("passedout").value = rec.passyear;
+                    document.getElementById("university").value = rec.universityname;
+                    document.getElementById("college").value = rec.collegename;
+                    document.getElementById("course").value = rec.course;
+                    document.getElementById("bank").value = rec.bankname;
+                    document.getElementById("branchname").value = rec.branchname;
+                    document.getElementById("accountno").value = rec.accountno;
+                    document.getElementById("address").value = rec.address;
+                    document.getElementById("aadharcopy").src = rec.aadharcopy;
+                    document.getElementById("passbookcopy").src = rec.passbook;
+                    document.getElementById("certificate").src = rec.castecertificte;
+
+                });
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+    function UpdateStatus() {
+        event.preventDefault();
+        const id = document.getElementById("id").value;
+        const studentname = document.getElementById("studentfullname").value;
+        const status = document.getElementById("status").value;
+
+
+        const getUpdatePromise = performAjax(
+            "PUT",
+            `http://localhost:1234/admin/studystatus/${id}`,
+            JSON.stringify({ status: status, studentname })
+        );
+        getUpdatePromise
+            .then((updatePromise) => {
+                alert('Details Updated');
+                LoadApplication();
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+
+
+
+</script>
+
+<body onload="LoadApplication()">
+    <table id="viewstudy" border="2" class="tablecss"></table>
+    <br><br>
+    <form onsubmit="UpdateStatus()">
+        <div class="modal fade" id="scholorship" role="dialog">
+            <div class="modal-dialogmodal-xl">
+                <div class="modal-content" style="background-color:lavender">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <font style="color:black;text-align: center">
+                            <h3>StudyScholorShip Details:</h3>
+                        </font>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-2"><input type="hidden" name="id" id="id" class="form-control"></div>
+                            <div class="col-sm-2"><label for="Student Full Name">Student Full Name:</label><br>
+                                <input type="text" name="studentfullname" id="studentfullname" class="form-control"
+                                    placeholder="enter name" required></div>
+
+                            <div class="col-sm-2"><label for="Father name">Father Name:</label><br>
+                                <input type="text" name="fathername" id="fathername" class="form-control"
+                                    placeholder="enter name" required>
+                            </div>
+                            <div class="col-sm-2"><label for="DOB">D O B :</label><br>
+                                <input type="date" name="dob" id="dob" class="form-control" required></div>
+                            <div class="col-sm-2"><label for="gender">Gender: </label><br>
+                                <input type="radio" value="male" name="gender" id="male">male
+                                <input type="radio" value="female" name="gender" id="female">female
+                            </div>
+                            <div class="col-sm-2"></div>
+
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+
+                            <div class="col-sm-2"><label for="Mobile No.">Mobile No.:</label><br>
+                                <input type="number" name="mobileno." id="mobileno" class="form-control" placeholder=""
+                                    required></div>
+                            <div class="col-sm-2"><label for="Aadhar No.">Aadhar No.:</label><br>
+                                <input type="number" name="aadharno." id="aadharno" class="form-control"
+                                    placeholder="e.g.7456-4545-6986" required></div>
+                            <div class="col-sm-2"><label for="ssctype">SSC Type:</label><br>
+                                <input type="radio" name="type" id="regular" value="regular" required>Regular
+                                <input type="radio" name="type" id="supply" value="supply" required>Supply
+                            </div>
+                            <div class="col-sm-2"><label for="Hall ticket No.">Hall Ticket No.:</label><br>
+                                <input type="number" name="hallticket no." id="hallticketno" class="form-control"
+                                    placeholder="" required>
+                            </div>
+
+                            <div class="col-sm-2"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="passedout">Passed Out:</label><br>
+                                <select class="form-control" id="passedout">
+                                    <option value="">--Select--</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2016">2016</option>
+                                    <option value="2015">2015</option>
+                                    <option value="2014">2014</option>
+                                </select>
+                            </div>
+
+                            <div class="col-sm-2"><label for="University name">University Name:</label><br>
+                                <select class="form-control" id="university">
+                                    <option value="--Select--">--Select--</option>
+                                    <option value="SathvahanaUniversity">SathvahanaUniversity</option>
+                                    <option value="JNTUH">JNTUH</option>
+                                    <option value="OsmaniaUniversity">OsmaniaUniversity</option>
+                                    <option value="KakathiyaUniversity">KakathiyaUniversity</option>
+                                </select></div>
+                            <div class="col-sm-2"><label for="college name">College Name:</label><br>
+                                <input type="text" class="form-control" name="collegename" id="college"
+                                    placeholder="Enter CollegeName" required>
+                            </div>
+                            <div class="col-sm-2"><label for="course">Course</label><br>
+                                <input type="text" class="form-control" name="course" id="course"
+                                    placeholder="Enter Your Course" required>
+
+                            </div>
+                            <div class="col-sm-2"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="address">College Address:</label><br>
+                                <textarea col="40" class="form-control" id="address"></textarea>
+                            </div>
+                            <div class="col-sm-2"><label for="select bank">Select Bank</label><br>
+                                <select class="form-control" id="bank">
+                                    <option value="--Select--">--Select--</option>
+                                    <option value="SBH">SBH</option>
+                                    <option value="Andhrabank">Andhrabank</option>
+                                    <option value="Kotakbank">Kotakbank</option>
+                                    <option value="SBI">SBI</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="branch name">Branch Name</label><br>
+                                <input type="text" name="branch name" id="branchname" class="form-control"
+                                    placeholder="Enter BranchName" required>
+                            </div>
+                            <div class="col-sm-2"><label for="Account No.">Account No.:</label><br>
+                                <input type="number" name="accountno" id="accountno" class="form-control"
+                                    placeholder="Enter Your AccNumber" required></div>
+                            <div class="col-sm-2"></div>
+
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="aadhar">Aadhar Copy</label></div>
+                            <div class="col-sm-4"> <img src="" alt="" name="image2" id="aadharcopy" height="120"
+                                    width="250"></div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="passbook copy">Passbook Copy</label></div>
+                            <div class="col-sm-4"> <img src="" alt="" name="image3" id="passbookcopy" height="120"
+                                    width="250"></div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="caste certificate">Caste Certificate</label></div>
+                            <div class="col-sm-4"> <img src="" alt="" name="image4" id="certificate" height="120"
+                                    width="250"></div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-2"><label for="status">Status</label></div>
+                            <div class="col-sm-2"><select name="status" id="status" class="form-control" required>
+                                    <option value="">Select</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Accept">Accept</option>
+                                    <option value="Reject">Reject</option>
+                            </div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-5"><input type="hidden" id="sss"></div>
+                            <br>
+                            <div class="col-sm-2">
+                                <button type="submit" class="btn btn-success">Update Status</button>
+                            </div>
+                            <div class="col-sm-5"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+</body>
+
+</html>
